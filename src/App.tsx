@@ -19,7 +19,7 @@ class App extends Component<{}, AppState> {
   render() {
     return (
       <div className="App">
-        <TitleText subtitle="This is a subtitle from props" />
+        <TitleText subtitle="This is another subtitle" />
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <p>
