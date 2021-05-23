@@ -2,23 +2,14 @@ import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import TitleText from "./TitleText";
+import Renderer from "./Renderer";
 
-interface AppState {
-  id: number;
-}
-
-class App extends Component<{}, AppState> {
-
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      id: 1
-    }
-  }
+class App extends Component {
 
   render() {
     return (
       <div className="App">
+        <Renderer />
         <TitleText subtitle="Oops I did it again" />
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
