@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
 import * as THREE from 'three';
 
-class Renderer extends Component {
+interface RendererState {
+  mount: HTMLDivElement;
+}
+
+class Renderer extends Component<{}, RendererState> {
 
 	componentDidMount() {
 
@@ -28,7 +32,7 @@ class Renderer extends Component {
 
   render() {
     return (
-      <div ref={ref => (this.mount = ref)} />
+      <div ref={mount => (this.mount = mount)} />
     )
   }
 }
