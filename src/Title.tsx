@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
+import './css/Title.css';
 
-interface TitleTextProps {
+interface TitleProps {
 	subtitle: string;
 }
 
-class TitleText extends Component<TitleTextProps, {}> {
+class Title extends Component<TitleProps, {}> {
 	render() {
 		return (
 			<div className="TitleText">
@@ -15,4 +16,4 @@ class TitleText extends Component<TitleTextProps, {}> {
 	}
 }
 
-export default TitleText;
+export default Title;

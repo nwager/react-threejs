@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import logo from './logo.svg';
-import './App.css';
-import TitleText from "./TitleText";
+import logo from './resources/logo.svg';
+import './css/App.css';
+import Title from "./Title";
 import Renderer from "./Renderer";
 
 class App extends Component {
@@ -10,20 +10,10 @@ class App extends Component {
     return (
       <div className="App">
         <Renderer />
-        <TitleText subtitle="Oops I did it again" />
+        <Title subtitle="Subtitle from props" />
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+          <p>This is some body text.</p>
         </header>
       </div>
     );

@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import * as THREE from 'three';
+import './css/Renderer.css'
 
 interface RendererState {
   mount: HTMLDivElement;
