@@ -7,6 +7,8 @@ interface RendererState {
 
 class Renderer extends Component<{}, RendererState> {
 
+  private mount: HTMLDivElement | null = null;
+
 	componentDidMount() {
 
 		var scene = new THREE.Scene();
@@ -15,7 +17,9 @@ class Renderer extends Component<{}, RendererState> {
     renderer.setSize( window.innerWidth, window.innerHeight );
     // document.body.appendChild( renderer.domElement );
     // use ref as a mount point of the Three.js scene instead of the document.body
-    this.mount.appendChild( renderer.domElement );
+    if (this.mount) {
+      this.mount.appendChild( renderer.domElement );
+    }
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     var cube = new THREE.Mesh( geometry, material );
