@@ -13,6 +13,7 @@ interface RendererState {
 class Renderer extends Component<{}, RendererState> {
 
   private mount: HTMLDivElement | null = null;
+  private whaleMesh: THREE.Object3D | null = null;
 
 	componentDidMount() {
 
@@ -56,8 +57,9 @@ class Renderer extends Component<{}, RendererState> {
     // Whale
 
     const loader = new GLTFLoader();
-    loader.load('./models/basic_bluewhale.glb', gltf => {
-      scene.add(gltf.scene);
+    loader.load(process.env.PUBLIC_URL + '/models/bluewhale_edited.glb', gltf => {
+      this.whaleMesh = gltf.scene;
+      scene.add(this.whaleMesh);
     }, undefined, error => {
       console.log("That's a whale of an error!");
       console.log(error);
@@ -68,12 +70,16 @@ class Renderer extends Component<{}, RendererState> {
     const skyTexture = new THREE.TextureLoader().load(skyURL);
     scene.background = skyTexture;
 
-    var animate = function () {
+    var animate = () => {
       requestAnimationFrame( animate );
 
       torus.rotation.x += 0.01;
       torus.rotation.y += 0.005;
       torus.rotation.z += 0.01;
+
+      if (this.whaleMesh) {
+        this.whaleMesh.rotation.z += 0.01;
+      }
 
       renderer.render( scene, camera );
 
