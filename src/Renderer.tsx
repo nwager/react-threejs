@@ -57,7 +57,6 @@ class Renderer extends Component<{}, RendererState> {
 
     const loader = new GLTFLoader();
     loader.load('./models/basic_bluewhale.glb', gltf => {
-      console.log(gltf);
       scene.add(gltf.scene);
     }, undefined, error => {
       console.log("That's a whale of an error!");
