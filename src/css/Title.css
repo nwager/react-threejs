@@ -1,3 +1,5 @@
-.TitleText {
+.Title {
   color: white;
+	display: grid;
+	place-items: center;
 }

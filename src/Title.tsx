@@ -8,7 +8,7 @@ interface TitleProps {
 class Title extends Component<TitleProps, {}> {
 	render() {
 		return (
-			<div className="TitleText">
+			<div className="Title">
 				<h1>React and ThreeJS</h1>
 				<p>{this.props.subtitle}</p>
 			</div>
