@@ -7,18 +7,16 @@ import './css/Renderer.css'
 import skyURL from './resources/sky_bg.jpg';
 
 interface RendererProps {
+  cameraDist: number;
+  radius: number;
+  omega: number;
   onScore(): void;
 }
 
-const orbitControls = false;
-const distance = 50;
-const r = 30;
-const omega = 1 / 2;
-const epsilon = 1
-
 class Renderer extends Component<RendererProps> {
 
-  // change some of these to state?
+  private orbitControls = false;
+  private epsilon = 1;
 
   private mount: HTMLDivElement | null = null;
   private whaleMesh: THREE.Object3D | null = null;
@@ -36,9 +34,9 @@ class Renderer extends Component<RendererProps> {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    camera.position.x = -distance;
-    camera.position.z = distance;
-    camera.position.y = distance/2;
+    camera.position.x = -this.props.cameraDist;
+    camera.position.z = this.props.cameraDist;
+    camera.position.y = this.props.cameraDist/2;
     camera.rotation.x -= this.degToRad(26.56);
     camera.rotation.y = this.degToRad(-45);
 
@@ -60,7 +58,7 @@ class Renderer extends Component<RendererProps> {
     const geometry = new THREE.TorusGeometry(8, 1, 16, 100);
     const material = new THREE.MeshBasicMaterial({ color: 0xffcb2e });
     const torus = new THREE.Mesh(geometry, material);
-    torus.position.y = r;
+    torus.position.y = this.props.radius;
     torus.rotation.x = this.degToRad(15);
     scene.add(torus);
 
@@ -69,9 +67,8 @@ class Renderer extends Component<RendererProps> {
     const loader = new GLTFLoader();
     loader.load(this.pubURL('/models/bluewhale_textured.glb'), gltf => {
 
-      const mesh = gltf.scene;
-      mesh.position.y = r;
-      this.whaleMesh = mesh;
+      this.whaleMesh = gltf.scene;
+      this.whaleMesh.position.y = this.props.radius;
 
       this.mixer = new THREE.AnimationMixer(this.whaleMesh);
       this.mixer.clipAction(gltf.animations[7]).play(); // main animation
@@ -83,7 +80,9 @@ class Renderer extends Component<RendererProps> {
       console.log(error);
     });
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    // Scene
+
+    const controls = this.orbitControls ? new OrbitControls(camera, renderer.domElement) : null;
 
     const skyTexture = new THREE.TextureLoader().load(skyURL);
     scene.background = skyTexture;
@@ -94,19 +93,21 @@ class Renderer extends Component<RendererProps> {
       if (this.mixer) { this.mixer.update(clock.getDelta()); }
 
       if (this.whaleMesh) {
+        // move the whale in a circle
         const phi = Math.PI / 2; // start at top of circle
         const t = clock.getElapsedTime();
-        const y = r * Math.sin(-omega * t + phi);
-        const z = r * Math.cos(-omega * t + phi);
+        const y = this.props.radius * Math.sin(-this.props.omega * t + phi);
+        const z = this.props.radius * Math.cos(-this.props.omega * t + phi);
         this.whaleMesh.position.set(0, y, z);
-        const period = 2 * Math.PI / omega;
+        const period = 2 * Math.PI / this.props.omega;
         const frac = (t % period) / period;
         this.whaleMesh.rotation.x = frac * Math.PI * 2;
 
-        if (this.whaleMesh.position.distanceTo(torus.position) < epsilon) {
-          const yzRotX = this.torusCircleState(Math.random() * 360);
-          torus.position.set(0, yzRotX[0], yzRotX[1]);
-          torus.rotation.set(yzRotX[2], 0, 0);
+        if (this.whaleMesh.position.distanceTo(torus.position) < this.epsilon) {
+          // move the torus to a random point in the whale's path when passed through
+          const circleState = this.torusCircleState(Math.random() * 360);
+          torus.position.set(0, circleState[0].y, circleState[0].z);
+          torus.rotation.set(circleState[1].x, 0, 0);
 
           this.props.onScore();
         }
@@ -114,7 +115,7 @@ class Renderer extends Component<RendererProps> {
 
       renderer.render( scene, camera );
 
-      if (orbitControls) {controls.update();}
+      if (controls) {controls.update();}
     };
     animate();
   }
@@ -140,12 +141,12 @@ class Renderer extends Component<RendererProps> {
   degToRad(deg: number): number { return deg * (Math.PI / 180); }
   radToDeg(rad: number): number { return rad * (180 / Math.PI); }
 
-  torusCircleState(deg: number): [number, number, number] {
-    const z = r * Math.cos(this.degToRad(deg));
-    const y = r * Math.sin(this.degToRad(deg));
+  torusCircleState(deg: number): [THREE.Vector3, THREE.Vector3] {
+    const z = this.props.radius * Math.cos(this.degToRad(deg));
+    const y = this.props.radius * Math.sin(this.degToRad(deg));
 
     const rotX = this.degToRad(-deg + 90)
-    return [y, z, rotX];
+    return [new THREE.Vector3(0, y, z), new THREE.Vector3(rotX, 0, 0)];
   }
 
   render() {

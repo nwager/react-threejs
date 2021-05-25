@@ -26,12 +26,12 @@ class App extends Component<{}, AppState> {
   render() {
     return (
       <div className="App">
-        <Renderer onScore={this.incrementScore} />
-        <Title subtitle="Subtitle from props" />
+        <Renderer cameraDist={50} radius={30} omega={0.5} onScore={this.incrementScore} />
+        <Title subtitle="Hope this website finds you whale." />
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <p>Score: {this.state.score}</p>
-          <a href="https://github.com/nwager/react-threejs" target="_blank">Github Repo</a>
+          <a href="https://github.com/nwager/react-threejs" target="_blank" rel="noreferrer">Github Repo</a>
         </header>
       </div>
     );
