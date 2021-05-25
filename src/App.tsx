@@ -31,6 +31,7 @@ class App extends Component<{}, AppState> {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <p>Score: {this.state.score}</p>
+          <a href="https://github.com/nwager/react-threejs" target="_blank">Github Repo</a>
         </header>
       </div>
     );
