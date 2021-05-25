@@ -13,7 +13,7 @@ interface RendererProps {
 const orbitControls = false;
 const distance = 50;
 const r = 30;
-const omega = 1 / 0.5;
+const omega = 1 / 2;
 const epsilon = 1
 
 class Renderer extends Component<RendererProps> {
