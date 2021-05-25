@@ -1,6 +1,8 @@
 # Learning React + ThreeJS
 
-This is a repo for experimenting with React and ThreeJS. Website: [https://nwager.github.io/react-threejs](https://nwager.github.io/react-threejs)
+This is a repository for experimenting with [React](https://reactjs.org/) and [ThreeJS](https://threejs.org/) on [Github Pages](https://pages.github.com/).
+
+View the website here: [https://nwager.github.io/react-threejs](https://nwager.github.io/react-threejs/)
 
 ## Credits
 
