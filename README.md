@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Learning React + ThreeJS
 
 This is a repo for experimenting with React and ThreeJS. Website: [https://nwager.github.io/react-threejs](https://nwager.github.io/react-threejs)
 
