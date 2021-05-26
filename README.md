@@ -12,6 +12,8 @@ Thanks to [Marina Vorontsova's blog post](https://blog.bitsrc.io/starting-with-r
 
 Thanks to [Fireship.io's ThreeJS Tutorial](https://youtu.be/Q7AOvWpIVHU) for providing ThreeJS tips and inspiration.
 
+Thanks to [Penpedia's whale puns](https://punpedia.org/whale-puns/) for the ~~awful~~ wordplay.
+
 ## 3D Models
 
 "Blue whale" ([https://skfb.ly/67nCt](https://skfb.ly/67nCt)) by misaooo is licensed under Creative Commons Attribution-NonCommercial ([http://creativecommons.org/licenses/by-nc/4.0/](http://creativecommons.org/licenses/by-nc/4.0/)).
