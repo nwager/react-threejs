@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import './css/Renderer.css'
 
@@ -9,18 +8,16 @@ interface RendererProps {
   cameraDist: number;
   radius: number;
   omega: number;
+
   onScore(): void;
+  onProgress(current: number): void;
   onLoad(): void;
 }
 
 class Renderer extends Component<RendererProps> {
 
-  private orbitControls = false;
-  private epsilon = 1;
-
   private mount: HTMLDivElement | null = null;
-  private whaleMesh: THREE.Object3D | null = null;
-  private mixer: THREE.AnimationMixer | null = null;
+  private scene: THREE.Scene = new THREE.Scene();
 
   private numStars = 200;  
 
@@ -28,6 +25,9 @@ class Renderer extends Component<RendererProps> {
 
     let manager = new THREE.LoadingManager();
     manager.onLoad = this.props.onLoad;
+    manager.onProgress = (url, current, total) => {
+      this.props.onProgress(current/total);
+    }
 
     let renderer = new THREE.WebGLRenderer({alpha: true});
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -36,134 +36,144 @@ class Renderer extends Component<RendererProps> {
     if (this.mount) {
       this.mount.appendChild(renderer.domElement);
     }
-    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     camera.position.x = -this.props.cameraDist;
     camera.position.z = this.props.cameraDist;
     camera.position.y = this.props.cameraDist/2;
     camera.lookAt(0,0,0);
-
+    renderer.render(this.scene, camera);
+    
     const clock = new THREE.Clock();
 
-    // Whale
+    this.addLights();
 
+    // Whale
+    let whaleMesh: THREE.Object3D;
+    let mixer: THREE.AnimationMixer;
     const loader = new GLTFLoader(manager);
     loader.load(this.pubURL('/models/bluewhale_textured.glb'), gltf => {
-
-      this.whaleMesh = gltf.scene;
-      this.whaleMesh.position.y = this.props.radius;
-
-      this.mixer = new THREE.AnimationMixer(this.whaleMesh);
-      this.mixer.clipAction(gltf.animations[7]).play(); // main animation
-
-      scene.add(this.whaleMesh);
-
+      whaleMesh = gltf.scene;
+      whaleMesh.position.y = this.props.radius;
+      this.scene.add(whaleMesh);
+      
+      mixer = new THREE.AnimationMixer(whaleMesh);
+      mixer.clipAction(gltf.animations[7]).play(); // main animation
     }, undefined, error => {
       console.log("That's a whale of an error!");
       console.log(error);
     });
 
-    renderer.render(scene, camera);
-
-    // Lights
-
-    this.addLights(scene);
-
-    // Helpers
-
-
-
     // Torus
-
     const geometry = new THREE.TorusGeometry(8, 1, 16, 100);
     const material = new THREE.MeshBasicMaterial({ color: 0xffcb2e });
     const torus = new THREE.Mesh(geometry, material);
-    torus.position.y = this.props.radius;
-    scene.add(torus);
+    this.setTorusCircle(torus, Math.random() * 360);
+    this.scene.add(torus);
+    // array for fading tori animations
+    const fadeTorusArray: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[] = [];
 
     // Stars
-
-    const stars = Array(this.numStars).fill(null).map(() => this.addStar(scene, camera));
-
-    // Scene
-
-    const controls = this.orbitControls ? new OrbitControls(camera, renderer.domElement) : null;
+    const stars = Array(this.numStars).fill(null).map(() => this.addStar(camera));
 
     var animate = () => {
       requestAnimationFrame(animate);
-      if (this.mixer) { this.mixer.update(clock.getDelta()); }
+      if (mixer) { mixer.update(clock.getDelta()); }
       const t = clock.getElapsedTime();
 
-      if (this.whaleMesh) {
+      // all whale-related actions
+      if (whaleMesh) {
         // move the whale in a circle
-        const phi = Math.PI / 2; // start at top of circle
-        const y = this.props.radius * Math.sin(-this.props.omega * t + phi);
-        const z = this.props.radius * Math.cos(-this.props.omega * t + phi);
-        this.whaleMesh.position.set(0, y, z);
-        const period = 2 * Math.PI / this.props.omega;
-        const frac = (t % period) / period;
-        this.whaleMesh.rotation.x = frac * Math.PI * 2;
+        this.moveWhale(whaleMesh, t);
         
-        // move the torus to a random point in the whale's path when passed through
-        if (this.whaleMesh.position.distanceTo(torus.position) < this.epsilon) {
-          const circleState = this.torusCircleState(Math.random() * 360);
-          torus.position.set(circleState[0].x, circleState[0].y, circleState[0].z);
-          torus.rotation.set(circleState[1].x, circleState[1].y, circleState[1].z);
-
+        // move torus when whale goes through, and create fading effect
+        const epsilon = 1; // tolerance for checking for equal positions
+        if (whaleMesh.position.distanceTo(torus.position) < epsilon) {
+          fadeTorusArray.push(this.createFadeTorus(torus));
+          this.setTorusCircle(torus, Math.random() * 360);
           this.props.onScore();
         }
+        // fade away score tori
+        this.fadeTori(fadeTorusArray);
 
         // loosely follow the whale
-        let lookVec = new THREE.Vector3().copy(this.whaleMesh.position);
-        camera.lookAt(lookVec.normalize().multiplyScalar(2));
+        let lookVec = new THREE.Vector3().copy(whaleMesh.position);
+        camera.lookAt(lookVec.normalize().multiplyScalar(2.3));
       }
 
       // update stars
       const starAmp = 0.01;
       const starOmega = 0.5;
       stars.forEach((star, i) => {
-        // add a little randomness to the axes
-        const axis = new THREE.Vector3(i,i*i,i*i);
-        star.rotateOnAxis(axis.normalize(), 0.02);
+        // add a little randomness to the rotation axes
+        star.rotateOnAxis(new THREE.Vector3(i,i*i,i*i).normalize(), 0.02);
         // vertical wave effect
         star.position.y += starAmp * Math.sin(starOmega*(t + (star.position.x / 10)));
       });
 
-      renderer.render(scene, camera);
-
-      if (controls) {controls.update();}
+      renderer.render(this.scene, camera);
     };
     animate();
   }
 
-  addLights(scene: THREE.Scene) {
+  addLights() {
     var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 300, 0 );
     hemiLight.intensity = 2;
-    scene.add(hemiLight);
+    this.scene.add(hemiLight);
 
     var dirLight = new THREE.DirectionalLight( 0xc300ff );
     dirLight.position.set( 75, 300, -75 );
     dirLight.intensity = 2;
-    scene.add(dirLight);
+    this.scene.add(dirLight);
 
     var ambientLight = new THREE.AmbientLight( 0xffffff );
     ambientLight.intensity = 3;
-    scene.add(ambientLight);
+    this.scene.add(ambientLight);
   }
 
-  pubURL(path: string): string { return process.env.PUBLIC_URL + path }
+  moveWhale = (whale: any, t: number) => {
+    const phi = Math.PI / 2; // start at top of circle
+    const y = this.props.radius * Math.sin(-this.props.omega * t + phi);
+    const z = this.props.radius * Math.cos(-this.props.omega * t + phi);
+    const period = 2 * Math.PI / this.props.omega;
+    const frac = (t % period) / period;
+    whale.position.set(0, y, z);
+    whale.rotation.x = frac * Math.PI * 2;
+  }
 
-  torusCircleState(deg: number): [THREE.Vector3, THREE.Vector3] {
+  // get torus position and rotation for a given angle on the circle path
+  setTorusCircle(torus: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>, deg: number) {
     const z = this.props.radius * Math.cos(THREE.MathUtils.degToRad(deg));
     const y = this.props.radius * Math.sin(THREE.MathUtils.degToRad(deg));
 
     const rx = THREE.MathUtils.degToRad(-deg + 90)
-    return [new THREE.Vector3(0, y, z), new THREE.Vector3(rx, 0, 0)];
+    torus.position.set(0, y, z);
+    torus.rotation.set(rx, 0, 0);
   }
 
-  addStar(scene: THREE.Scene, camera: THREE.Camera) {
+  createFadeTorus(oldTorus: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>): THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> {
+    const clone = oldTorus.clone();
+    clone.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    clone.material.transparent = true;
+    this.scene.add(clone);
+    return clone;
+  }
+
+  fadeTori(fadeTorusArray: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[]) {
+    const fadeAmount = 0.1;
+    const sizeInc = 0.06;
+    fadeTorusArray.forEach((torus, i) => {
+      if (torus.material.opacity <= 0) {
+        this.scene.remove(torus);
+        fadeTorusArray.splice(i, 1);
+      }
+      torus.material.opacity -= fadeAmount;
+      torus.scale.addScalar(sizeInc);
+    })
+  }
+
+  addStar = (camera: THREE.Camera) => {
     const geometry = new THREE.SphereGeometry(0.4, 4, 2);
     const material = new THREE.MeshStandardMaterial({
       // blue, purple
@@ -182,9 +192,11 @@ class Renderer extends Component<RendererProps> {
   
     star.position.set(x, y, z);
     star.rotation.set(rx, ry, rz);
-    scene.add(star);
+    this.scene.add(star);
     return star;
   }
+
+  pubURL(path: string): string { return process.env.PUBLIC_URL + path }
 
   render() {
     return (

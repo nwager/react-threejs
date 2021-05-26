@@ -2,17 +2,20 @@ import React, {Component} from 'react';
 import './css/LoadingScreen.css';
 
 interface LoadingScreenProps {
-	text: string;
-	loading: boolean;
+	opacity: number;
+	progress: number;
 }
 
-class LoadingScreen extends Component<LoadingScreenProps, {}> {
+class LoadingScreen extends Component<LoadingScreenProps> {
 	render() {
-		return (
-			<div className={`LoadingScreen ${this.props.loading ? "" : "DoneLoading"}`}>
-				<h1>{this.props.text}</h1>
+		return this.props.opacity > 0 ? (
+			<div className="LoadingScreen" style={{opacity: this.props.opacity}}>
+				<h1 className="loadingText">Loading</h1>
+				<div className="progressParent">
+					<div className="progressBar" style={{ width: `${this.props.progress*100}%` }}></div>
+				</div>
 			</div>
-		);
+		) : null;
 	}
 }
 
