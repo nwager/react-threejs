@@ -19,8 +19,6 @@ class Renderer extends Component<RendererProps> {
   private mount: HTMLDivElement | null = null;
   private scene: THREE.Scene = new THREE.Scene();
 
-  private numStars = 200;  
-
 	componentDidMount() {
 
     let manager = new THREE.LoadingManager();
@@ -74,8 +72,9 @@ class Renderer extends Component<RendererProps> {
     const fadeTorusArray: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[] = [];
 
     // Stars
-    const stars = Array(this.numStars).fill(null).map(() => this.addStar(camera));
+    const stars = Array(250).fill(null).map(() => this.addStar(camera));
 
+    // All animation
     var animate = () => {
       requestAnimationFrame(animate);
       if (mixer) { mixer.update(clock.getDelta()); }
@@ -116,6 +115,7 @@ class Renderer extends Component<RendererProps> {
     animate();
   }
 
+  // adds all lights to the scene
   addLights() {
     var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 300, 0 );
@@ -132,7 +132,8 @@ class Renderer extends Component<RendererProps> {
     this.scene.add(ambientLight);
   }
 
-  moveWhale = (whale: any, t: number) => {
+  // moves whale along circlular path, given the curren time
+  moveWhale(whale: any, t: number) {
     const phi = Math.PI / 2; // start at top of circle
     const y = this.props.radius * Math.sin(-this.props.omega * t + phi);
     const z = this.props.radius * Math.cos(-this.props.omega * t + phi);
@@ -152,6 +153,7 @@ class Renderer extends Component<RendererProps> {
     torus.rotation.set(rx, 0, 0);
   }
 
+  // instantiates torus fade animation
   createFadeTorus(oldTorus: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>): THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> {
     const clone = oldTorus.clone();
     clone.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -160,6 +162,7 @@ class Renderer extends Component<RendererProps> {
     return clone;
   }
 
+  // fades all active tori animations
   fadeTori(fadeTorusArray: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>[]) {
     const fadeAmount = 0.1;
     const sizeInc = 0.06;
@@ -173,6 +176,7 @@ class Renderer extends Component<RendererProps> {
     })
   }
 
+  // instantiates a star
   addStar = (camera: THREE.Camera) => {
     const geometry = new THREE.SphereGeometry(0.4, 4, 2);
     const material = new THREE.MeshStandardMaterial({
@@ -183,10 +187,10 @@ class Renderer extends Component<RendererProps> {
     });
     const star = new THREE.Mesh(geometry, material);
   
-    let [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(150));
+    let [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(200));
     // reroll if too close to camera
     while (new THREE.Vector3(x,y,z).distanceTo(camera.position) < 10) {
-      [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(150));
+      [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(200));
     }
     const [rx, ry, rz] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(Math.PI));
   
@@ -196,6 +200,7 @@ class Renderer extends Component<RendererProps> {
     return star;
   }
 
+  // adds public URL to beginning of path
   pubURL(path: string): string { return process.env.PUBLIC_URL + path }
 
   render() {
