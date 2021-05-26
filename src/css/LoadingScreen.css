@@ -1,0 +1,23 @@
+.LoadingScreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: #000000;
+	color: white;
+	display: grid;
+	align-items: center;
+	justify-content: center;
+
+
+	opacity: 1;
+
+	--fade-time: 1s;
+}
+
+.DoneLoading {
+	opacity: 0;
+	height: 0;
+	transition: opacity var(--fade-time) ease-in-out, height 0s var(--fade-time); /* NOTE: Match 'fadeOutDuration' in LoadingScreen.tsx */
+}

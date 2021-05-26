@@ -10,6 +10,7 @@ interface RendererProps {
   radius: number;
   omega: number;
   onScore(): void;
+  onLoad(): void;
 }
 
 class Renderer extends Component<RendererProps> {
@@ -25,12 +26,15 @@ class Renderer extends Component<RendererProps> {
 
 	componentDidMount() {
 
-    var renderer = new THREE.WebGLRenderer({alpha: true});
+    let manager = new THREE.LoadingManager();
+    manager.onLoad = this.props.onLoad;
+
+    let renderer = new THREE.WebGLRenderer({alpha: true});
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setPixelRatio(window.devicePixelRatio);
     // use ref as a mount point of the Three.js scene instead of the document.body
     if (this.mount) {
-      this.mount.appendChild( renderer.domElement );
+      this.mount.appendChild(renderer.domElement);
     }
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -41,6 +45,24 @@ class Renderer extends Component<RendererProps> {
     camera.lookAt(0,0,0);
 
     const clock = new THREE.Clock();
+
+    // Whale
+
+    const loader = new GLTFLoader(manager);
+    loader.load(this.pubURL('/models/bluewhale_textured.glb'), gltf => {
+
+      this.whaleMesh = gltf.scene;
+      this.whaleMesh.position.y = this.props.radius;
+
+      this.mixer = new THREE.AnimationMixer(this.whaleMesh);
+      this.mixer.clipAction(gltf.animations[7]).play(); // main animation
+
+      scene.add(this.whaleMesh);
+
+    }, undefined, error => {
+      console.log("That's a whale of an error!");
+      console.log(error);
+    });
 
     renderer.render(scene, camera);
 
@@ -62,25 +84,7 @@ class Renderer extends Component<RendererProps> {
 
     // Stars
 
-    const stars = Array(this.numStars).fill(null).map(() => this.addStar(scene));
-
-    // Whale
-
-    const loader = new GLTFLoader();
-    loader.load(this.pubURL('/models/bluewhale_textured.glb'), gltf => {
-
-      this.whaleMesh = gltf.scene;
-      this.whaleMesh.position.y = this.props.radius;
-
-      this.mixer = new THREE.AnimationMixer(this.whaleMesh);
-      this.mixer.clipAction(gltf.animations[7]).play(); // main animation
-
-      scene.add(this.whaleMesh);
-
-    }, undefined, error => {
-      console.log("That's a whale of an error!");
-      console.log(error);
-    });
+    const stars = Array(this.numStars).fill(null).map(() => this.addStar(scene, camera));
 
     // Scene
 
@@ -88,7 +92,6 @@ class Renderer extends Component<RendererProps> {
 
     var animate = () => {
       requestAnimationFrame(animate);
-
       if (this.mixer) { this.mixer.update(clock.getDelta()); }
       const t = clock.getElapsedTime();
 
@@ -102,26 +105,29 @@ class Renderer extends Component<RendererProps> {
         const frac = (t % period) / period;
         this.whaleMesh.rotation.x = frac * Math.PI * 2;
         
+        // move the torus to a random point in the whale's path when passed through
         if (this.whaleMesh.position.distanceTo(torus.position) < this.epsilon) {
-          // move the torus to a random point in the whale's path when passed through
           const circleState = this.torusCircleState(Math.random() * 360);
           torus.position.set(circleState[0].x, circleState[0].y, circleState[0].z);
           torus.rotation.set(circleState[1].x, circleState[1].y, circleState[1].z);
 
           this.props.onScore();
         }
-        // kinda follow the whale
+
+        // loosely follow the whale
         let lookVec = new THREE.Vector3().copy(this.whaleMesh.position);
         camera.lookAt(lookVec.normalize().multiplyScalar(2));
       }
+
       // update stars
-      const starAmp = 0.04;
+      const starAmp = 0.01;
       const starOmega = 0.5;
       stars.forEach((star, i) => {
+        // add a little randomness to the axes
         const axis = new THREE.Vector3(i,i*i,i*i);
         star.rotateOnAxis(axis.normalize(), 0.02);
         // vertical wave effect
-        star.position.y += starAmp * Math.sin(starOmega*t + (star.position.x*2*Math.PI/this.numStars));
+        star.position.y += starAmp * Math.sin(starOmega*(t + (star.position.x / 10)));
       });
 
       renderer.render(scene, camera);
@@ -149,18 +155,15 @@ class Renderer extends Component<RendererProps> {
 
   pubURL(path: string): string { return process.env.PUBLIC_URL + path }
 
-  degToRad(deg: number): number { return deg * (Math.PI / 180); }
-  radToDeg(rad: number): number { return rad * (180 / Math.PI); }
-
   torusCircleState(deg: number): [THREE.Vector3, THREE.Vector3] {
-    const z = this.props.radius * Math.cos(this.degToRad(deg));
-    const y = this.props.radius * Math.sin(this.degToRad(deg));
+    const z = this.props.radius * Math.cos(THREE.MathUtils.degToRad(deg));
+    const y = this.props.radius * Math.sin(THREE.MathUtils.degToRad(deg));
 
-    const rotX = this.degToRad(-deg + 90)
-    return [new THREE.Vector3(0, y, z), new THREE.Vector3(rotX, 0, 0)];
+    const rx = THREE.MathUtils.degToRad(-deg + 90)
+    return [new THREE.Vector3(0, y, z), new THREE.Vector3(rx, 0, 0)];
   }
 
-  addStar(scene: THREE.Scene) {
+  addStar(scene: THREE.Scene, camera: THREE.Camera) {
     const geometry = new THREE.SphereGeometry(0.4, 4, 2);
     const material = new THREE.MeshStandardMaterial({
       // blue, purple
@@ -170,7 +173,11 @@ class Renderer extends Component<RendererProps> {
     });
     const star = new THREE.Mesh(geometry, material);
   
-    const [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(150));
+    let [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(150));
+    // reroll if too close to camera
+    while (new THREE.Vector3(x,y,z).distanceTo(camera.position) < 10) {
+      [x, y, z] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(150));
+    }
     const [rx, ry, rz] = Array(3).fill(0).map(() => THREE.MathUtils.randFloatSpread(Math.PI));
   
     star.position.set(x, y, z);
