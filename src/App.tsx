@@ -57,7 +57,7 @@ class App extends Component<{}, AppState> {
         <Title />
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p className="scoreText">{this.state.score}</p>
+          <p className="scoreText">Score: {this.state.score}</p>
           <a href="https://github.com/nwager/react-threejs" target="_blank" rel="noreferrer">Github</a>
         </header>
         <div className="scrollSpace" style={{ height: '100vh' }} />
