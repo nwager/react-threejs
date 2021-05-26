@@ -1,6 +1,8 @@
 canvas {
-  position:absolute;
+  position:fixed;
   left:0;
   top:0;
   z-index: -1;
+  background: rgb(191,11,208);
+  background: linear-gradient(13deg, rgba(191,11,208,1) 16%, rgba(146,109,245,1) 50%, rgba(21,228,221,1) 100%);
 }
