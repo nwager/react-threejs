@@ -177,7 +177,7 @@ class Renderer extends Component<RendererProps> {
   }
 
   // instantiates a star
-  addStar = (camera: THREE.Camera) => {
+  addStar(camera: THREE.Camera) {
     const geometry = new THREE.SphereGeometry(0.4, 4, 2);
     const material = new THREE.MeshStandardMaterial({
       // blue, purple
