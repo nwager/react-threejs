@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
-import logo from './resources/logo.svg';
 import './css/App.css';
-import Title from "./Title";
+import Header from './Header';
+import Score from './Score';
 import Renderer from "./Renderer";
 import LoadingScreen from './LoadingScreen';
+import MenuBar from './MenuBar';
+import MailWidget from './MailWidget'
 
 interface AppState {
   score: number;
@@ -54,13 +56,11 @@ class App extends Component<{}, AppState> {
       <div className="App">
         <LoadingScreen opacity={this.state.opacity} progress={this.state.progress}/>
         <Renderer cameraDist={this.state.cameraDist} radius={this.state.radius} omega={this.state.omega} onScore={this.incrementScore} onProgress={this.onProgress} onLoad={this.onLoad} />
-        <Title />
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p className="scoreText">Score: {this.state.score}</p>
-          <a href="https://github.com/nwager/react-threejs" target="_blank" rel="noreferrer">Github</a>
-        </header>
-        <div className="scrollSpace" style={{ height: '100vh' }} />
+        <Header />
+        <MenuBar />
+        <Score score={this.state.score}/>
+        <MailWidget />
+        <div className="scrollSpace" style={{ height: '200vh' }} />
       </div>
     );
   }

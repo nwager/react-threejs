@@ -21,20 +21,26 @@ class Renderer extends Component<RendererProps> {
 
 	componentDidMount() {
 
-    let manager = new THREE.LoadingManager();
+    const manager = new THREE.LoadingManager();
     manager.onLoad = this.props.onLoad;
     manager.onProgress = (url, current, total) => {
       this.props.onProgress(current/total);
     }
 
-    let renderer = new THREE.WebGLRenderer({alpha: true});
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    const renderer = new THREE.WebGLRenderer({alpha: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     // use ref as a mount point of the Three.js scene instead of the document.body
     if (this.mount) {
       this.mount.appendChild(renderer.domElement);
     }
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    window.onresize = function() {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
 
     camera.position.x = -this.props.cameraDist;
     camera.position.z = this.props.cameraDist;
@@ -101,14 +107,7 @@ class Renderer extends Component<RendererProps> {
       }
 
       // update stars
-      const starAmp = 0.01;
-      const starOmega = 0.5;
-      stars.forEach((star, i) => {
-        // add a little randomness to the rotation axes
-        star.rotateOnAxis(new THREE.Vector3(i,i*i,i*i).normalize(), 0.02);
-        // vertical wave effect
-        star.position.y += starAmp * Math.sin(starOmega*(t + (star.position.x / 10)));
-      });
+      this.starsWave(stars, t);
 
       renderer.render(this.scene, camera);
     };
@@ -116,7 +115,7 @@ class Renderer extends Component<RendererProps> {
   }
 
   // adds all lights to the scene
-  addLights() {
+  addLights = () =>{
     var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.set( 0, 300, 0 );
     hemiLight.intensity = 2;
@@ -154,7 +153,7 @@ class Renderer extends Component<RendererProps> {
   }
 
   // instantiates torus fade animation
-  createFadeTorus(oldTorus: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>): THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> {
+  createFadeTorus = (oldTorus: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>): THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> => {
     const clone = oldTorus.clone();
     clone.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
     clone.material.transparent = true;
@@ -177,7 +176,7 @@ class Renderer extends Component<RendererProps> {
   }
 
   // instantiates a star
-  addStar(camera: THREE.Camera) {
+  addStar = (camera: THREE.Camera) => {
     const geometry = new THREE.SphereGeometry(0.4, 4, 2);
     const material = new THREE.MeshStandardMaterial({
       // blue, purple
@@ -198,6 +197,28 @@ class Renderer extends Component<RendererProps> {
     star.rotation.set(rx, ry, rz);
     this.scene.add(star);
     return star;
+  }
+
+  starsWave(stars: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>[], t: number) {
+    const starAmp = 0.01;
+    const starOmega = 0.5;
+    stars.forEach((star, i) => {
+      // add a little randomness to the rotation axes
+      star.rotateOnAxis(new THREE.Vector3(i,i*i,i*i).normalize(), 0.02);
+      // vertical wave effect
+      star.position.y += starAmp * Math.sin(starOmega*(t + (star.position.x / 10)));
+    });
+  }
+
+  // sin approximation using x^3 polynomial - https://gamedev.stackexchange.com/a/4780
+  // not sure if this is faster than Math.sin() but I'm gonna leave it here just in case
+  cubeSin(x: number): number {
+    const PI = Math.PI
+    x = x % (2*PI);
+    const B = 4 / Math.PI;
+    const C = -4 / (Math.PI*PI);
+
+    return -(B * x + C * x * ((x < 0) ? -x : x));
   }
 
   // adds public URL to beginning of path

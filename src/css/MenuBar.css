@@ -1,0 +1,37 @@
+.MenuBar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	--menu-short: 4rem;
+}
+
+.Links {
+	list-style: none;
+	padding: 0.5rem 0 0 1rem;
+	margin: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.7rem;
+	height: var(--menu-short);
+	width: 100vw;
+}
+
+.bar-item {
+	height: 70%;
+	padding: 0.3rem 0;
+	display: flex;
+	align-items: center;
+}
+
+.bar-item > a {
+	height: 100%;
+}
+.bar-item > a > img {
+	height: 100%;
+	filter: brightness(0) invert(1);
+}
+
+.bar-item > a:hover {
+	opacity: 0.5;
+}

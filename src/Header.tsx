@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
-import './css/Title.css';
+import './css/Header.css';
 
-class Title extends Component {
+interface TitleState {
+	subtitle: string;
+}
+
+class Header extends Component<{}, TitleState> {
 
 	private puns = [
 		"Hope this website finds you whale.",
@@ -13,23 +17,22 @@ class Title extends Component {
 		"Isn't this fin.",
 		"Whale, whale, whale, look who's here.",
 		"Taylor won gold in the 2021 Cetacea-lympics Gymnastics competition.",
-		"No pun here, you've been spared.",
+		"No pun here; you've been spared.",
 	]
-	private subtitle: string;
 
 	constructor(props: any) {
 		super(props);
-		this.subtitle = this.puns[Math.floor(Math.random()*this.puns.length)];
+		this.state = { subtitle: this.puns[Math.floor(Math.random()*this.puns.length)] };
 	}
 
 	render() {
 		return (
-			<div className="Title">
+			<div className="Header">
 				<h1>React + ThreeJS</h1>
-				<p className="subtitle">{this.subtitle}</p>
+				<p className="subtitle">{this.state.subtitle}</p>
 			</div>
 		);
 	}
 }
 
-export default Title;
+export default Header;
