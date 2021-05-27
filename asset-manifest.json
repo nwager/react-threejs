@@ -1,23 +1,27 @@
 {
   "files": {
-    "main.css": "/react-threejs/static/css/main.b075ad46.chunk.css",
-    "main.js": "/react-threejs/static/js/main.83263fca.chunk.js",
-    "main.js.map": "/react-threejs/static/js/main.83263fca.chunk.js.map",
-    "runtime-main.js": "/react-threejs/static/js/runtime-main.f7a3981c.js",
-    "runtime-main.js.map": "/react-threejs/static/js/runtime-main.f7a3981c.js.map",
-    "static/js/2.3a85d57d.chunk.js": "/react-threejs/static/js/2.3a85d57d.chunk.js",
-    "static/js/2.3a85d57d.chunk.js.map": "/react-threejs/static/js/2.3a85d57d.chunk.js.map",
-    "static/js/3.9024e78c.chunk.js": "/react-threejs/static/js/3.9024e78c.chunk.js",
-    "static/js/3.9024e78c.chunk.js.map": "/react-threejs/static/js/3.9024e78c.chunk.js.map",
+    "main.css": "/react-threejs/static/css/main.acc4f13d.chunk.css",
+    "main.js": "/react-threejs/static/js/main.76ff2b49.chunk.js",
+    "main.js.map": "/react-threejs/static/js/main.76ff2b49.chunk.js.map",
+    "runtime-main.js": "/react-threejs/static/js/runtime-main.b0554b27.js",
+    "runtime-main.js.map": "/react-threejs/static/js/runtime-main.b0554b27.js.map",
+    "static/js/2.2f3d8dc4.chunk.js": "/react-threejs/static/js/2.2f3d8dc4.chunk.js",
+    "static/js/2.2f3d8dc4.chunk.js.map": "/react-threejs/static/js/2.2f3d8dc4.chunk.js.map",
+    "static/js/3.c879e8bd.chunk.js": "/react-threejs/static/js/3.c879e8bd.chunk.js",
+    "static/js/3.c879e8bd.chunk.js.map": "/react-threejs/static/js/3.c879e8bd.chunk.js.map",
     "index.html": "/react-threejs/index.html",
-    "static/css/main.b075ad46.chunk.css.map": "/react-threejs/static/css/main.b075ad46.chunk.css.map",
-    "static/js/2.3a85d57d.chunk.js.LICENSE.txt": "/react-threejs/static/js/2.3a85d57d.chunk.js.LICENSE.txt",
-    "static/media/logo.6ce24c58.svg": "/react-threejs/static/media/logo.6ce24c58.svg"
+    "static/css/main.acc4f13d.chunk.css.map": "/react-threejs/static/css/main.acc4f13d.chunk.css.map",
+    "static/js/2.2f3d8dc4.chunk.js.LICENSE.txt": "/react-threejs/static/js/2.2f3d8dc4.chunk.js.LICENSE.txt",
+    "static/media/email.b4731eb9.svg": "/react-threejs/static/media/email.b4731eb9.svg",
+    "static/media/github.342298b7.svg": "/react-threejs/static/media/github.342298b7.svg",
+    "static/media/react.de556238.svg": "/react-threejs/static/media/react.de556238.svg",
+    "static/media/send-mail.7c5122fb.svg": "/react-threejs/static/media/send-mail.7c5122fb.svg",
+    "static/media/threejs.b26a3dcc.svg": "/react-threejs/static/media/threejs.b26a3dcc.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.f7a3981c.js",
-    "static/js/2.3a85d57d.chunk.js",
-    "static/css/main.b075ad46.chunk.css",
-    "static/js/main.83263fca.chunk.js"
+    "static/js/runtime-main.b0554b27.js",
+    "static/js/2.2f3d8dc4.chunk.js",
+    "static/css/main.acc4f13d.chunk.css",
+    "static/js/main.76ff2b49.chunk.js"
   ]
 }
